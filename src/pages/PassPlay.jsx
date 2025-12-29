@@ -1,24 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Board from "../components/Board";
 import Status from "../components/Status";
 
-const winPatterns = [
-  [0,1,2],[3,4,5],[6,7,8],
-  [0,3,6],[1,4,7],[2,5,8],
-  [0,4,8],[2,4,6]
-];
-
-// function checkWinner(board) {
-//   for (let [a, b, c] of winPatterns) {
-//     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-//       return board[a];
-//     }
-//   }
-//   return null;
-// }
-
 import { checkWinner, isDraw } from "../utils/gameUtils";
-
+import { playClick, playWin, playDraw } from "../utils/sound";
 
 export default function PassPlay() {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -26,8 +11,11 @@ export default function PassPlay() {
 
   const winner = checkWinner(board);
 
+  // HANDLE PLAYER MOVE
   function handleMove(index) {
     if (board[index] || winner) return;
+
+    playClick();
 
     const newBoard = [...board];
     newBoard[index] = isXTurn ? "X" : "O";
@@ -35,6 +23,16 @@ export default function PassPlay() {
     setIsXTurn(!isXTurn);
   }
 
+  // WIN / DRAW SOUND EFFECT
+  useEffect(() => {
+    if (winner) {
+      playWin();
+    } else if (isDraw(board)) {
+      playDraw();
+    }
+  }, [winner, board]);
+
+  // RESET GAME
   function resetGame() {
     setBoard(Array(9).fill(null));
     setIsXTurn(true);

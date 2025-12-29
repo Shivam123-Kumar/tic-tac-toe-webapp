@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
 import Board from "../components/Board";
 import Status from "../components/Status";
+
 import { checkWinner, isDraw } from "../utils/gameUtils";
 import { getBestMove } from "../utils/minimax";
+import { playClick, playWin, playDraw } from "../utils/sound";
 
 export default function VsCPU() {
   const [board, setBoard] = useState(Array(9).fill(null));
@@ -10,8 +12,11 @@ export default function VsCPU() {
 
   const winner = checkWinner(board);
 
+  // PLAYER MOVE
   function handlePlayerMove(index) {
     if (!isPlayerTurn || board[index] || winner) return;
+
+    playClick();
 
     const newBoard = [...board];
     newBoard[index] = "X";
@@ -19,6 +24,7 @@ export default function VsCPU() {
     setIsPlayerTurn(false);
   }
 
+  // CPU MOVE
   useEffect(() => {
     if (!isPlayerTurn && !winner && !isDraw(board)) {
       const cpuMove = getBestMove(board);
@@ -35,6 +41,16 @@ export default function VsCPU() {
     }
   }, [isPlayerTurn, board, winner]);
 
+  // WIN / DRAW SOUND EFFECT
+  useEffect(() => {
+    if (winner) {
+      playWin();
+    } else if (isDraw(board)) {
+      playDraw();
+    }
+  }, [winner, board]);
+
+  // RESET GAME
   function resetGame() {
     setBoard(Array(9).fill(null));
     setIsPlayerTurn(true);
